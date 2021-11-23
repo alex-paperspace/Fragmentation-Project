@@ -85,8 +85,16 @@ void* pool_allocate(int req_size, Pool* pool) {
 	return res;
 }
 
-void pool_deallocate(void* dptr, Pool* pool) {
+void pool_free(void* dptr, Pool* pool) {
+	if (dptr == pool->rsrv_head) {
+		pool->rsrv_head = pool->rsrv_head->next;
+		return;
+	}
 
+	Node* current = pool->rsrv_head->next;
+	while (current != NULL) {
+		current = current->next;
+	}
 }
 
 int main()
@@ -110,7 +118,7 @@ int main()
 	printf("Address: %p\n", ptr);
 	printf("Value: %d\n", *ptr);
 
-	pool_deallocate(ptr, &pool);
+	pool_free(ptr, &pool);
 
 	/*int* ptr2 = (int*)pool_allocate(4, &pool);
 	*ptr2 = 10;
