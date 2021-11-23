@@ -5,27 +5,24 @@
 #define K (1024)
 #define M (1048576)
 
-typedef struct avail_node avail_node;
+typedef struct Node Node;
 typedef struct Pool Pool;
 
-struct avail_node {
+struct Node {
 	int size;
-	avail_node* next;
+	Node* next;
 };
 
 struct Pool {
 	char *memory;
-	avail_node* avail_head;
+	Node* avail_head;
+	Node* rsrv_head;
 };
 
-void pool_insert_avail_node(int diff) {
-
-}
-
 void* pool_allocate(int req_size, Pool* pool) {
-	avail_node* old_head = pool->avail_head;
-	avail_node* current = old_head;
-	avail_node* prev = NULL;
+	Node* old_head = pool->avail_head;
+	Node* current = old_head;
+	Node* prev = NULL;
 	void* res = NULL;
 
 	while (current != NULL) {
@@ -37,6 +34,23 @@ void* pool_allocate(int req_size, Pool* pool) {
 			//found available chunk
 			res = (void*)current;
 
+			//fix reserve list
+			//maybe this should be a FIFO structure instead of a list?
+			if (pool->rsrv_head == NULL) {
+				//first alloc
+				pool->rsrv_head = current;
+				Node* newnode = pool->rsrv_head;
+				newnode->size = req_size;
+				newnode->next = NULL;
+			}
+			else {
+				//not first alloc
+				Node* newnode = current;
+				newnode->size = req_size;
+				newnode->next = pool->rsrv_head;
+				pool->rsrv_head = newnode;
+			}
+
 			//fix avail list
 			if (current == old_head) {
 				pool->avail_head = (char*)current + req_size;
@@ -44,12 +58,13 @@ void* pool_allocate(int req_size, Pool* pool) {
 			}
 			else {
 				//current addr is after old_head
-				if (diff >= sizeof(avail_node)) {
+				if (diff >= sizeof(Node)) {
 					//diff is >= size needed to insert a new avail_node
 					
 					prev->next = (char*)current + req_size;
-
-
+					Node* newnode = prev->next;
+					newnode->size = diff;
+					newnode->next = current->next;
 				}
 				else {
 					/*
@@ -70,6 +85,10 @@ void* pool_allocate(int req_size, Pool* pool) {
 	return res;
 }
 
+void pool_deallocate(void* dptr, Pool* pool) {
+
+}
+
 int main()
 {
 	srand(time(NULL)); //seed rand
@@ -79,9 +98,10 @@ int main()
 	Pool pool;
 
 	pool.memory = (char*)malloc(INIT_SIZE);
-	pool.avail_head = (avail_node*)pool.memory;
+	pool.avail_head = (Node*)pool.memory;
 	pool.avail_head->size = INIT_SIZE;
 	pool.avail_head->next = NULL;
+	pool.rsrv_head = NULL;
 
 	printf("Address of pool avail head: %p\n", pool.avail_head);
 
@@ -90,10 +110,12 @@ int main()
 	printf("Address: %p\n", ptr);
 	printf("Value: %d\n", *ptr);
 
-	int* ptr2 = (int*)pool_allocate(4, &pool);
+	pool_deallocate(ptr, &pool);
+
+	/*int* ptr2 = (int*)pool_allocate(4, &pool);
 	*ptr2 = 10;
 	printf("Address: %p\n", ptr2);
-	printf("Value: %d\n", *ptr2);
+	printf("Value: %d\n", *ptr2);*/
 
 	printf("Address of pool avail head: %p\n", pool.avail_head);
 
