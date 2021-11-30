@@ -1,6 +1,9 @@
 #include "randomizer.h"
 #include "macros.h"
 
+extern size_1;
+extern size_2;
+
 heap_stats random_operations(Pool* pool) {
 	int allocations = 0;
 	int deallocations = 0;
@@ -16,17 +19,17 @@ heap_stats random_operations(Pool* pool) {
 			//allocate
 			void* temp;
 			if (rand() % 2 == 0) {
-				//allocate 100
-				temp = pool_allocate(100, pool);
+				//allocate size_1
+				temp = pool_allocate(size_1, pool);
 #ifdef VERYVERBOSE
-				printf("Allocating 100...\n");
+				printf("Allocating %d...\n", size_1);
 #endif
 			}
 			else {
-				//allocate 1000
-				temp = pool_allocate(1000, pool);
+				//allocate size_2
+				temp = pool_allocate(size_2, pool);
 #ifdef VERYVERBOSE
-				printf("Allocating 1000...\n");
+				printf("Allocating %d...\n", size_2);
 #endif
 			}
 
