@@ -153,6 +153,13 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.c" />
+    <ClCompile Include="pool.c" />
+    <ClCompile Include="randomizer.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="macros.h" />
+    <ClInclude Include="pool.h" />
+    <ClInclude Include="randomizer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
