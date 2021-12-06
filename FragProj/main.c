@@ -3,6 +3,7 @@
 #include <time.h>
 #include "pool.h"
 #include "randomizer.h"
+#include "macros.h"
 
 #define KILO (1000)
 #define MEGA (1000000)
